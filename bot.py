@@ -5,7 +5,7 @@ from discord.ext import commands
 from tkinter import *
 
 
-TOKEN = "Enter Token"
+TOKEN = "MTEyMDQ4MTIyODcyNjk5NzA0Mg.GiYl25.h_5Y8CthLnIwFzkuTlUnpFo8S-dW7ZVI7bgpZM"
 client = commands.Bot(command_prefix="!", intents = discord.Intents.all())
 entrys = []
 
@@ -57,5 +57,13 @@ async def me(ctx):
         await ctx.send(f"{ctx.message.author.mention} That format is incorrect, please try again with the following format. \n!me (UserName)(Rank)")
 
     entrys.append([ctx.author, ingame_name, ingame_rank])
+
+
+def send_message(channel_id):
+    channel = client.get_channel(channel_id)
+    print(channel_id)
+    print(channel)
+    channel.send("tester")
+    
 
 client.run(TOKEN)
