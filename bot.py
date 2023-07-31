@@ -1,17 +1,22 @@
-"""Version 1.0 Tourni Bot."""
+"""Tourni bot Version 1.3 (NOT FUNCTIONAL)"""
 
 import discord
 from discord.ext import commands
-from tkinter import *
+import tracemalloc
 
 
-TOKEN = "MTEyMDQ4MTIyODcyNjk5NzA0Mg.GiYl25.h_5Y8CthLnIwFzkuTlUnpFo8S-dW7ZVI7bgpZM"
+TOKEN = "ENTER TOKEN"
 client = commands.Bot(command_prefix="!", intents = discord.Intents.all())
 entrys = []
 
 @client.event
 async def on_ready():
     print("Bot is online")
+    # Check memory allocation
+    print(tracemalloc.get_traced_memory())
+
+    # Stop tracemalloc
+    tracemalloc.stop()
 
 @client.command()
 async def me(ctx):
@@ -59,11 +64,11 @@ async def me(ctx):
     entrys.append([ctx.author, ingame_name, ingame_rank])
 
 
-def send_message(channel_id):
+async def send_message(channel_id):
     channel = client.get_channel(channel_id)
-    print(channel_id)
-    print(channel)
-    channel.send("tester")
+    await channel.send("tester")
     
+def run_bot():
+    client.run(TOKEN)
 
-client.run(TOKEN)
+tracemalloc.start()
