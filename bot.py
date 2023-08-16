@@ -1,4 +1,4 @@
-"""Tourni bot Version 1.4 (NOT FUNCTIONAL)"""
+"""Tourni bot Version 1.5 (NOT FUNCTIONAL)"""
 
 import discord
 from discord.ext import commands 
