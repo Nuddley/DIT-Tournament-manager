@@ -3,49 +3,62 @@
 from tkinter import *
 from tkinter import messagebox
 import multiprocessing
+import time
 import bot
 
 class Gui:
     # Inital GUI setup
     def __init__(self, parent):
-        self.botstatus = False
-        self.state_lbl = Label(parent, text="Bot is offline")
-        self.butt_run = Button(parent, text="Run Bot", command=self.onclick_run_bot)
-        self.token_entry = Entry(parent)
-        self.prefix_entry = Entry(parent)
-        self.mod_entry = Entry(parent)
-        self.token_lbl = Label(parent, text="Token")
-        self.prefix_lbl = Label(parent, text="Prefix")
-        self.mod_lbl = Label(parent, text="Moderator role")
-        self.apply_butt = Button(parent, text="Apply bot values", command=self.onclick_apply_botval  )
+        self.first_startup = Frame(parent)
+        self.main_page = Frame(parent)
+        self.bot_ison = False
 
-        self.state_lbl.grid(row=4, column=0)
-        self.butt_run.grid(row=5, column=0)
+        # Widgets for first time startup page
+        self.state_lbl = Label(self.first_startup, text="Bot is offline")
+        self.token_entry = Entry(self.first_startup)
+        self.mod_entry = Entry(self.first_startup)
+        self.token_lbl = Label(self.first_startup, text="Token")
+        self.mod_lbl = Label(self.first_startup, text="Moderator role")
+        self.apply_butt = Button(self.first_startup, text="Apply bot values", command=self.onclick_apply_botval)
+        self.run_butt = Button(self.first_startup, text="Run Bot", command=self.onclick_run_bot)
+        self.state_lbl.grid(row=5, column=0)
         self.token_entry.grid(row=0, column=0)
         self.token_lbl.grid(row=0, column=1)
         self.mod_entry.grid(row=1, column=0)
         self.mod_lbl.grid(row=1, column=1)
-        self.prefix_entry.grid(row=2, column=0)
-        self.prefix_lbl.grid(row=2, column=1)
         self.apply_butt.grid(row=3, column=1)
+        self.run_butt.grid(row=4, column=1)
 
-    # Function checks if bot is online or not and either starts it or ends it aswell as configuring the GUI
-    def onclick_run_bot(self):
-        if self.botstatus == False:
+        # Widgets for main page
+        self.main_page_title = Label(self.main_page, text="THIS IS THE MAIN PAGE")
+        self.main_page_title.grid(row=0, column=0)
+
+        try:
+            f = open("prefrences.txt", "x")
+            print("GUI | FIRST TIME STARTUP: beginning first time start up")
+            self.first_startup.pack()
+            f.close()
+        except FileExistsError:
+            print("GUI | RETURNING STARTUP: CONTINUE")
+            self.first_startup.pack() # DEV COMMENT COME BACK AND CHANGE THIS TO SELF.MAIN_PAGE.PACK!!! --------------------------------------------------------------------------------------------
             bot_process.start()
-            self.botstatus = True
-            self.butt_run.configure(text="Stop Bot")
-        elif self.botstatus == True:
-            bot_process.terminate()
-            self.botstatus = False
-            self.butt_run.configure(text="Run Bot")
 
     # Function sets bot values and 
     def onclick_apply_botval(self):
-        print(self.token_entry.get())
-        bot.TOKEN == self.token_entry.get()
-        bot.PREFIX == self.prefix_entry.get()
-        bot.MODERATOR_ROLE == self.mod_entry.get()
+        print("GUI | ENTRY GET: ", self.token_entry.get())
+        txt_file = open("prefrences.txt", "w")
+        txt_file.write(self.token_entry.get())
+        txt_file.write("\n"+self.mod_entry.get())
+        txt_file.close()
+        print("GUI | SETTINGS WRITTEN")
+
+    # Function for running the bot but it dont work yet
+    def onclick_run_bot(self):
+        print("GUI | ONCLICK RUNBOT RECIEVED")
+        try:
+            bot.run_bot()
+        except RuntimeError:
+            print("UHHHHHHHHHHHHHHHHHHHHH")
 
 # Run the backend functions
 def backend_run_func():
@@ -61,3 +74,4 @@ bot_process = multiprocessing.Process(target=bot.run_bot)
 # Main routine, starts backend window
 if __name__ == "__main__":
     backend_process.start()
+    bot.init_bot
