@@ -1,9 +1,9 @@
-"""Tourni bot Version 1.5 NOT FUNCTIONAL)"""
+"""Tourni bot Version 2.1 NOT FUNCTIONAL)"""
 
 from tkinter import *
 from tkinter import messagebox
 import multiprocessing
-import time
+import sys
 import bot
 
 class Gui:
@@ -29,10 +29,6 @@ class Gui:
         self.apply_butt.grid(row=3, column=1)
         self.run_butt.grid(row=4, column=1)
 
-        # Widgets for main page
-        self.main_page_title = Label(self.main_page, text="THIS IS THE MAIN PAGE")
-        self.main_page_title.grid(row=0, column=0)
-
         try:
             f = open("prefrences.txt", "x")
             print("GUI | FIRST TIME STARTUP: beginning first time start up")
@@ -40,8 +36,8 @@ class Gui:
             f.close()
         except FileExistsError:
             print("GUI | RETURNING STARTUP: CONTINUE")
-            self.first_startup.pack() # DEV COMMENT COME BACK AND CHANGE THIS TO SELF.MAIN_PAGE.PACK!!! --------------------------------------------------------------------------------------------
             bot_process.start()
+            sys.exit()
 
     # Function sets bot values and 
     def onclick_apply_botval(self):
@@ -56,9 +52,10 @@ class Gui:
     def onclick_run_bot(self):
         print("GUI | ONCLICK RUNBOT RECIEVED")
         try:
-            bot.run_bot()
+            bot_process.start()
+            sys.exit
         except RuntimeError:
-            print("UHHHHHHHHHHHHHHHHHHHHH")
+            print("GUI | ERROR PLEASE RESTART")
 
 # Run the backend functions
 def backend_run_func():
@@ -74,4 +71,3 @@ bot_process = multiprocessing.Process(target=bot.run_bot)
 # Main routine, starts backend window
 if __name__ == "__main__":
     backend_process.start()
-    bot.init_bot

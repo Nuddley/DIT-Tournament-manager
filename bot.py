@@ -3,21 +3,11 @@
 import discord
 from discord.ext import commands 
 from discord.ext.commands import has_permissions
+from discord import app_commands
 import tracemalloc
 
 client = commands.Bot(command_prefix="!", intents = discord.Intents.all())
 entrys = []
-
-# First time startup check
-try:
-    txt_open = open("prefrences.txt", "r")
-    prefrences = txt_open.readlines()
-    TOKEN = prefrences[0]
-    MODERATOR_ROLE = prefrences[1]
-    txt_open.close()
-    print("BOT | STARTUP: CONTINUE")
-except FileNotFoundError:
-    print("BOT | FIRST TIME STARTUP")
 
 # Funtion to run the bot
 def run_bot():
@@ -33,12 +23,9 @@ def run_bot():
             client.run(TOKEN)
             print("BOT | CLIENT STARTED PLEASE WAIT")
         except discord.errors.LoginFailure:
-            print("BOT | IMPROPER TOKEN PASSED")
+            print("BOT | IMPROPER TOKEN PASSED PLEASE DELETE PREFRENCES.TXT AND RESTART")
     except FileNotFoundError:
         print("BOT | PREFRENCES.TXT NOT LOCATED")
-
-def init_bot():
-    print("BOT | BOT INITIALIZED")
 
 @client.event
 async def on_ready():
@@ -46,52 +33,27 @@ async def on_ready():
     # Check memory allocation and print it
     print("BOT | Traced memory: ", tracemalloc.get_traced_memory())
     tracemalloc.stop()
-
-# Initial add command, only available for competitors
-@client.command()
-async def me(ctx):
-    message_content = ctx.message.content
-    ingame_name = ""
-    ingame_rank = ""
-    name_rank = []
-    
-    message = message_content[4:]
-    user = ctx.author
-
-    # Remove unneccasary characters in the format
+    # Sync slash commands
     try:
-        temp_list = []
-        for letter in message:
-            temp_list.append(letter)
-            name_rank.append(letter)
-        temp_list.remove("(")
-        temp_list.remove("(")
-        name_rank.remove("(")
-        name_rank.remove("(")
+        synced = await client.tree.sync()
+        print(f"Synced {len(synced)} command/s")
+    except Exception as e:
+        print(e)
 
-        for x in temp_list:
-            if x == ")":
-                name_rank.remove(x)
-                break
-            else:
-                ingame_name += x
-                name_rank.remove(x)
+# DEV Test command to get slash commands working
+@client.tree.command(name="hello")
+async def hello(interaction: discord.Interaction):
+    await interaction.response.send_message(f"Hey {interaction.user.mention}! This is a test command",
+    ephemeral = True)
 
-        for x in name_rank:
-            if x == ")":
-                break
-            else:
-                ingame_rank += x
-
-        # Send confirmation message to DMs
-        await ctx.author.send(f"Hello {user} you have entered the tournament with the following information: \nUsername:{ingame_name} \nRank: {ingame_rank}")
-    except:
-        # Or tell the user the correct format if any issues
-        await ctx.send(f"{ctx.message.author.mention} That format is incorrect, please try again with the following format. \n!me (UserName)(Rank)")
-
+# The entry command
+@client.tree.command(name="compete")
+@app_commands.describe(username = "Your InGame name and tag E.G Username#tag", rank = "Your current InGame rank")
+async def compete(interaction: discord.Interaction, username: str, rank: str):
+    await interaction.response.send_message(f"{interaction.user.name} Applied with rank {rank} and username {username}")
     # Append validated entry to the list and print it to console
-    entrys.append([ctx.author, ingame_name, ingame_rank])
-    print(f"NEW ENTRY: \n    Discord: {user} | \n    IGN: {ingame_name} | \n    Rank: {ingame_rank} |")
+    entrys.append([interaction.user.mention, username, rank])
+    print(f"NEW ENTRY: \n    Discord: {interaction.user.mention} | \n    IGN: {username} | \n    Rank: {rank} |")
 
 
 """↓↓↓ Moderator Only Commands ↓↓↓"""
@@ -101,6 +63,12 @@ async def me(ctx):
 async def get_teams(ctx):
     message = ctx.message.content
     user = ctx.author
+    # Checks the prefrences file to get mod role variable
+    txt_open = open("prefrences.txt", "r")
+    prefrences = txt_open.readlines()
+    print("BOT | DEV ||", prefrences)
+    MODERATOR_ROLE = prefrences[1]
+    txt_open.close()
     # Checks if user is a server moderator and runs command if true.
     if MODERATOR_ROLE in [i.name.lower() for i in user.roles]:
         f = open("Teams.txt", "w")
