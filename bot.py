@@ -4,10 +4,14 @@ import discord
 from discord.ext import commands 
 from discord.ext.commands import has_permissions
 from discord import app_commands
+from tkinter import messagebox
 import tracemalloc
 
 client = commands.Bot(command_prefix="!", intents = discord.Intents.all())
 entrys = []
+
+global valorant_ranks
+valorant_ranks = ["iron", "bronze", "silver", "gold", "platinum", "diamond", "ascendant", "immortal", "radiant"]
 
 # Funtion to run the bot
 def run_bot():
@@ -16,6 +20,8 @@ def run_bot():
         txt_open = open("prefrences.txt", "r")
         prefrences = txt_open.readlines()
         print("BOT | DEV ||", prefrences)
+        global TOKEN
+        global MODERATOR_ROLE
         TOKEN = prefrences[0]
         MODERATOR_ROLE = prefrences[1]
         txt_open.close()
@@ -23,7 +29,7 @@ def run_bot():
             client.run(TOKEN)
             print("BOT | CLIENT STARTED PLEASE WAIT")
         except discord.errors.LoginFailure:
-            print("BOT | IMPROPER TOKEN PASSED PLEASE DELETE PREFRENCES.TXT AND RESTART")
+            messagebox(title="BOT ERROR", message="IMPROPER TOKEN PASSED PLEASE DELETE PREFRENCES.TXT AND RESTART")
     except FileNotFoundError:
         print("BOT | PREFRENCES.TXT NOT LOCATED")
 
@@ -40,21 +46,20 @@ async def on_ready():
     except Exception as e:
         print(e)
 
-# DEV Test command to get slash commands working
-@client.tree.command(name="hello")
-async def hello(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Hey {interaction.user.mention}! This is a test command",
-    ephemeral = True)
-
 # The entry command
 @client.tree.command(name="compete")
-@app_commands.describe(username = "Your InGame name and tag E.G Username#tag", rank = "Your current InGame rank")
+@app_commands.describe(username = "Your in game name and tag E.G 'Username#4826'", rank = "Your current in game rank by full word and number E.G 'diamond 3'")
 async def compete(interaction: discord.Interaction, username: str, rank: str):
-    await interaction.response.send_message(f"{interaction.user.name} Applied with rank {rank} and username {username}")
-    # Append validated entry to the list and print it to console
-    entrys.append([interaction.user.mention, username, rank])
-    print(f"NEW ENTRY: \n    Discord: {interaction.user.mention} | \n    IGN: {username} | \n    Rank: {rank} |")
-
+    # Checks for a valorant tag and a valid rank before appending it to the list
+    if any(check in rank for check in valorant_ranks):
+        if "#" in username:
+            entrys.append([interaction.user.mention, username, rank])
+            await interaction.response.send_message(f"{interaction.user.name} you have applied with rank: {rank} and username: {username}", ephemeral=True)
+            print(f"NEW ENTRY:\n    Discord: {interaction.user.mention}\n    IGN: {username}\n    Rank: {rank}")
+        else:
+            await interaction.response.send_message(f"The Username you have entered with ({username}) does not have a tag which is required, this entry has not been recorded. Please try again ", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"The Rank you have entered with ({rank}) is not a valid VALORANT rank, this entry has not been recorded. Please try again with one of the following ranks: iron, bronze, silver, gold, platinum, diamond, ascendant, immortal, radiant.", ephemeral=True)
 
 """↓↓↓ Moderator Only Commands ↓↓↓"""
 
@@ -64,11 +69,6 @@ async def get_teams(ctx):
     message = ctx.message.content
     user = ctx.author
     # Checks the prefrences file to get mod role variable
-    txt_open = open("prefrences.txt", "r")
-    prefrences = txt_open.readlines()
-    print("BOT | DEV ||", prefrences)
-    MODERATOR_ROLE = prefrences[1]
-    txt_open.close()
     # Checks if user is a server moderator and runs command if true.
     if MODERATOR_ROLE in [i.name.lower() for i in user.roles]:
         f = open("Teams.txt", "w")

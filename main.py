@@ -37,9 +37,9 @@ class Gui:
         except FileExistsError:
             print("GUI | RETURNING STARTUP: CONTINUE")
             bot_process.start()
-            sys.exit()
+            f.close()
 
-    # Function sets bot values and 
+    # Function sets bot values to the prefrences file
     def onclick_apply_botval(self):
         print("GUI | ENTRY GET: ", self.token_entry.get())
         txt_file = open("prefrences.txt", "w")
@@ -48,14 +48,13 @@ class Gui:
         txt_file.close()
         print("GUI | SETTINGS WRITTEN")
 
-    # Function for running the bot but it dont work yet
+    # Function for sending the run command.
     def onclick_run_bot(self):
         print("GUI | ONCLICK RUNBOT RECIEVED")
         try:
             bot_process.start()
-            sys.exit
         except RuntimeError:
-            print("GUI | ERROR PLEASE RESTART")
+            messagebox(title="GUI ERROR", message="ERROR CANNOT START TWICE PLEASE RESTART AND CHECK YOUR PREFRENCES")
 
 # Run the backend functions
 def backend_run_func():
