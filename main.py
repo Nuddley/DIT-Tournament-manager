@@ -1,4 +1,4 @@
-"""Tourni bot Version 2.1 NOT FUNCTIONAL)"""
+"""Tourni bot Version 2.2"""
 
 from tkinter import *
 from tkinter import messagebox
