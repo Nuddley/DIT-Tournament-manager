@@ -10,6 +10,8 @@ To use this bot you will need: A discord bot, (These can be made at the discord 
 A discord server in which you have admin controls to add bots,
 
 And a moderator role for moderator only commands.
+
+For more help feel free to join the discord server and talk to me or some other helpers: https://discord.gg/pX3s3VtxMJ
 _________________________________________________
 
 Steps:
